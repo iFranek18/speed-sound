@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speed Sound Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #111;
+      color: #0f0;
+    }
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Speed Sound Generator</h1>
+  <p>Rozpocznij jazdę, a dźwięk będzie reagował na prędkość!</p>
+  <button onclick="startTracking()">Start</button>
+  <p id="speed">Prędkość: 0 km/h</p>
+  
+  <audio id="sound1" src="https://freesound.org/data/previews/613/613198_5674468-lq.mp3" loop></audio> <!-- Low hum -->
+  <audio id="sound2" src="https://freesound.org/data/previews/613/613202_5674468-lq.mp3" loop></audio> <!-- Mid hum -->
+  <audio id="sound3" src="https://freesound.org/data/previews/613/613204_5674468-lq.mp3" loop></audio> <!-- High hum -->
+
+  <script>
+    let watchID;
+    let currentSound = null;
+
+    function startTracking() {
+      if (navigator.geolocation) {
+        watchID = navigator.geolocation.watchPosition(success, error, {
+          enableHighAccuracy: true,
+          maximumAge: 1000
+        });
+      } else {
+        alert("Twoje urządzenie nie obsługuje geolokalizacji.");
+      }
+    }
+
+    function success(pos) {
+      let speed = pos.coords.speed || 0;
+      let kmh = (speed * 3.6).toFixed(1);
+      document.getElementById("speed").innerText = `Prędkość: ${kmh} km/h`;
+      handleSpeedSound(kmh);
+    }
+
+    function error(err) {
+      console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+
+    function handleSpeedSound(speed) {
+      const s1 = document.getElementById("sound1");
+      const s2 = document.getElementById("sound2");
+      const s3 = document.getElementById("sound3");
+
+      // Stop all sounds
+      [s1, s2, s3].forEach(s => { s.pause(); s.currentTime = 0; });
+
+      if (speed > 5 && speed <= 15) {
+        s1.play();
+        currentSound = s1;
+      } else if (speed > 15 && speed <= 25) {
+        s2.play();
+        currentSound = s2;
+      } else if (speed > 25) {
+        s3.play();
+        currentSound = s3;
+      }
+    }
+  </script>
+</body>
+</html>
