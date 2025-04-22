@@ -3,31 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speed Sound Generator</title>
+  <title>Electric Engine Dashboard</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
+      background: radial-gradient(#111, #000);
+      color: #00ffcc;
       text-align: center;
       padding: 2rem;
-      background-color: #111;
-      color: #0f0;
     }
-    button {
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
       margin-top: 2rem;
+    }
+    .gauges {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+    }
+    .gauge {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: #222;
+      border: 3px solid #00ffcc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #0ff;
+      box-shadow: 0 0 10px #0ff;
+    }
+    select, button {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <h1>Speed Sound Generator</h1>
-  <p>Rozpocznij jazdę, a dźwięk będzie reagował na prędkość!</p>
+  <h1>Electric Engine Dashboard</h1>
   <button onclick="startTracking()">Start</button>
-  <p id="speed">Prędkość: 0 km/h</p>
-  
-  <audio id="sound1" src="https://freesound.org/data/previews/613/613198_5674468-lq.mp3" loop></audio> <!-- Low hum -->
-  <audio id="sound2" src="https://freesound.org/data/previews/613/613202_5674468-lq.mp3" loop></audio> <!-- Mid hum -->
-  <audio id="sound3" src="https://freesound.org/data/previews/613/613204_5674468-lq.mp3" loop></audio> <!-- High hum -->
+  <br>
+  <label for="sound-select">Wybierz dźwięk silnika:</label>
+  <select id="sound-select">
+    <option value="1">Silnik 1</option>
+    <option value="2">Silnik 2</option>
+    <option value="3">Silnik 3</option>
+  </select>
+
+  <div class="dashboard">
+    <div class="gauges">
+      <div class="gauge" id="speedometer">0 km/h</div>
+      <div class="gauge" id="rpm">0 RPM</div>
+    </div>
+  </div>
+
+  <audio id="sound1" src="https://freesound.org/data/previews/703/703476_7037797-lq.mp3" loop></audio>
+  <audio id="sound2" src="https://freesound.org/data/previews/256/256113_3263906-lq.mp3" loop></audio>
+  <audio id="sound3" src="https://freesound.org/data/previews/516/516324_11274471-lq.mp3" loop></audio>
 
   <script>
     let watchID;
@@ -47,7 +84,11 @@
     function success(pos) {
       let speed = pos.coords.speed || 0;
       let kmh = (speed * 3.6).toFixed(1);
-      document.getElementById("speed").innerText = `Prędkość: ${kmh} km/h`;
+      let rpmValue = Math.min(10000, Math.floor(speed * 2000));
+
+      document.getElementById("speedometer").innerText = `${kmh} km/h`;
+      document.getElementById("rpm").innerText = `${rpmValue} RPM`;
+
       handleSpeedSound(kmh);
     }
 
@@ -56,22 +97,17 @@
     }
 
     function handleSpeedSound(speed) {
+      const selected = document.getElementById("sound-select").value;
       const s1 = document.getElementById("sound1");
       const s2 = document.getElementById("sound2");
       const s3 = document.getElementById("sound3");
 
-      // Stop all sounds
       [s1, s2, s3].forEach(s => { s.pause(); s.currentTime = 0; });
 
-      if (speed > 5 && speed <= 15) {
-        s1.play();
-        currentSound = s1;
-      } else if (speed > 15 && speed <= 25) {
-        s2.play();
-        currentSound = s2;
-      } else if (speed > 25) {
-        s3.play();
-        currentSound = s3;
+      if (speed > 3) {
+        const chosen = document.getElementById(`sound${selected}`);
+        chosen.play();
+        currentSound = chosen;
       }
     }
   </script>
