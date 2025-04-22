@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,6 +71,15 @@
     let currentSound = null;
 
     function startTracking() {
+      // Odblokowanie dźwięków w iOS
+      const s1 = document.getElementById("sound1");
+      const s2 = document.getElementById("sound2");
+      const s3 = document.getElementById("sound3");
+
+      [s1, s2, s3].forEach(s => {
+        s.play().then(() => s.pause()).catch(() => {});
+      });
+
       if (navigator.geolocation) {
         watchID = navigator.geolocation.watchPosition(success, error, {
           enableHighAccuracy: true,
@@ -82,14 +91,18 @@
     }
 
     function success(pos) {
-      let speed = pos.coords.speed || 0;
+      let speed = pos.coords.speed;
+      if (speed === null || speed === undefined) {
+        speed = 5; // domyślna prędkość testowa ~18 km/h
+      }
+
       let kmh = (speed * 3.6).toFixed(1);
       let rpmValue = Math.min(10000, Math.floor(speed * 2000));
 
       document.getElementById("speedometer").innerText = `${kmh} km/h`;
       document.getElementById("rpm").innerText = `${rpmValue} RPM`;
 
-      handleSpeedSound(kmh);
+      handleSpeedSound(parseFloat(kmh));
     }
 
     function error(err) {
